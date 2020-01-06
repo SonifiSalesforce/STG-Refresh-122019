@@ -1,0 +1,10 @@
+<apex:page standardController="Account" extensions="SupportTeamAccountExtension" lightningStylesheets="true">
+    <apex:pageMessages ></apex:pageMessages>
+    <apex:pageBlock title="Support Team Escalation Hierarchy">
+        <apex:pageBlockTable value="{!lstuser}" var="field">
+            <apex:column headervalue="Name" value="{!field.Name}" />
+            <apex:column headervalue="Manager Title" value="{!field.Manager_Title__c}" />
+            <apex:column headervalue="Cell Phone" value="{!field.Mobile_Phone__c}" />
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+</apex:page>

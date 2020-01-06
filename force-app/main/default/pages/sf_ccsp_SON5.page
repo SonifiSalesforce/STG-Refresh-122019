@@ -1,0 +1,328 @@
+<apex:page id="SF" showHeader="false" standardStylesheets="false" doctype="html-5.0">
+    <!-- https://ccsp-dev-ed--enghouse-ccsp.na47.visual.force.com/apex/sf_ccsp_en_lightning_load-->
+    <!-- https://sftester.loc:444/sf_softphone_en_lightning.html -->
+    <!-- https://c.eu6.visual.force.com/apex/sf_ccsp_en -->
+    <!-- https://ps-tp2.dn12.loc/TouchPoint/#/Login?logFileID=null -->
+    <!-- https://dnccsp12.dn12.loc/TouchPoint -->
+    <!-- https://ccsp-dev-ed--enghouse-ccsp.visualforce.com/apex/sf_ccsp_en -->
+    <!-- This  page is ready to run both locally and from salesforce
+        in order to run and develop this locally:
+        1) Serve this page from local server (with IIS or other way)
+        2) In SF's Call Center's page in 'CTI Adapter URL' put URL of this page 
+        3) You are ready, now it is served from your local machine instead of static apex pages
+        4) After you finished development, put this page into 'visualforce pages' and update CTI adapter URL to point there. -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <script>
+
+        // Global variable used in sf_softphone.js
+        var Archive_path = '{!JSENCODE($Resource.CCSPTPArchive)}';
+        var namespaceToAppend = "Enghouse_CCSP__";
+        var shouldAppedNamespace = false;
+
+        
+
+        //if user is in classic call getPageInfo.
+        function getPageInfo()
+        { sforce.interaction.getPageInfo(getPageInfoCallback);  }  
+
+                   
+        var getPageInfoCallback = function(response)
+         {
+                if(response.result)
+                {  
+                   var resultstr = response.result, obj=JSON.parse(resultstr);
+                   //alert(resultstr);
+                   var cid = obj.objectId;
+                   var callnum = callDataHelper.getCallIdHex(currentCallData);
+                   //var callnum = '23555666777'; for testing only
+                   sforce.interaction.runApex('GlobalWebServices', 'CreateCTILog', 'caseid='+encodeURIComponent(cid)+'&callid='+encodeURIComponent(callnum), callback);
+ 
+                }
+                else
+                {  alert('Error occurred while trying to get page info: ' +response.error);  }
+         }    
+        
+        var callback = function(response)
+        {
+            if(response.error)
+            { alert(response.error); }
+        }
+
+        var sfLoad_host = window.location != window.parent.location ?
+            document.referrer :
+            document.location.origin;
+
+        var sfLoad_appendOnLoad = [{
+                type: 'css',
+                files: ['css/jquery.mobile-1.4.5.min.css', 'css/style.css', 'css/tabs.css', 'css/jquery.modal.min.css', 'css/loader.css'],
+                shouldAppendArchivePath: true,
+                appendToTag: 'head',
+                isCommon: true
+            },
+            {
+                type: 'script',
+                files: ['scripts/common/translator.js', 'scripts/vendor/jquery-1.11.3.min.js', 'scripts/vendor/jquery.mobile-1.4.5.min.js', 'scripts/vendor/jquery.xml2json.js', 'scripts/vendor/jquery.signalR-2.2.0.min.js', 'scripts/vendor/json2.js', 'scripts/vendor/log4javascript.js', 'scripts/vendor/jquery.modal.min.js'],
+                shouldAppendArchivePath: true,
+                appendToTag: 'head',
+                isCommon: true
+            },
+            {
+                type: 'script',
+                files: [sfLoad_host + '/support/api/47.0/lightning/opencti.js'],
+                shouldAppendArchivePath: false,
+                appendToTag: 'head',
+                isLightning: true
+            },
+            {
+                type: 'script',
+                files: ['scripts/common/ccsp.ps.logutil.js', 'scripts/lightning/ccsp.ps.sfLightning.js', 'scripts/common/ccsp.ps.sfhub.js', 'scripts/common/ccsp.ps.ccsputil.js', 'scripts/common/callHistoryFeed.js', 'scripts/common/sf_softphone.js'],
+                shouldAppendArchivePath: true,
+                appendToTag: 'body',
+                isLightning: true
+            },
+            {
+                type: 'script',
+                files: [sfLoad_host + '/support/api/47.0/interaction.js', sfLoad_host + '/support/console/47.0/integration.js'],
+                shouldAppendArchivePath: false,
+                appendToTag: 'head',
+                isClassic: true
+            },
+            {
+                type: 'script',
+                files: ['scripts/common/ccsp.ps.logutil.js', 'scripts/classic/ccsp.ps.sfcti.js', 'scripts/common/ccsp.ps.sfhub.js', 'scripts/classic/ccsp.ps.sfconsole.js', 'scripts/common/ccsp.ps.ccsputil.js', 'scripts/common/callHistoryFeed.js', 'scripts/common/sf_softphone.js'],
+                shouldAppendArchivePath: true,
+                appendToTag: 'body',
+                isClassic: true
+            },
+            {
+                type: 'script',
+                files: ['scripts/common/tabs.js'],
+                shouldAppendArchivePath: true,
+                appendToTag: 'body',
+                isCommon: true
+            }
+        ];
+
+        window.onbeforeunload = function(e) {
+            e.preventDefault();
+        };
+        </script>
+        <script>
+        try {
+
+        } catch (e) { console.log('This exception is caused because we are using 2 sources for onLoad.js script. If it says something about ' < ' it\'s fine and you can ignore it.') }
+        </script>
+        <script type="text/javascript" src="scripts/common/onLoad.js"></script>
+        <script type="text/javascript" src="{!JSENCODE($Resource.CCSPTPArchive)}/scripts/common/onLoad.js"></script>
+ 
+    </head>
+
+    <body>
+        <div class="psWrapper sf-hidden">
+            <ul class="psTabs psClearfix" data-tabgroup="first-tab-group">
+                <li><a href="#agentStatusCallInfo" class="active"> <span class="translatible" data-trn-id = "agentStatusTabTitle"></span> </a> </li>
+                <li><a href="#touchPointFrame" class="active"><span class="translatible" data-trn-id = "touchPointTabTitle"></span></a> </li>
+            </ul>
+        </div>
+        <div class="loaderContainer">
+            <div class="loader">
+                <span class="dot dot_1"></span>
+                <span class="dot dot_2"></span>
+                <span class="dot dot_3"></span>
+                <span class="dot dot_4"></span>
+            </div>
+        </div>
+        <section id="first-tab-group" class="psTabgroup sf-hidden">
+            <div id="agentStatusCallInfo">
+                <div>
+                    <div id="company-logo-div" class="logo">
+                        <apex:image id="imgLogo" url="{!URLFOR($Resource.CCSPTPArchive,
+                                            'images/ei-logo.png')}"></apex:image>
+                    </div>
+                    <div id="error-indicator-div" class="logo">
+                        <a id="error-indicator" href="#error-indicator-popup-tooltip" data-rel="popup" data-transition="pop" title="error occured...">
+                            <apex:image id="imgError" url="{!URLFOR($Resource.CCSPTPArchive,
+                                            'images/error.png')}" alt="error indicator"></apex:image>
+                        </a>
+                    </div>
+                </div>
+                <div class="vspacer"></div>
+                <div class="legendBox">
+                    <fieldset>
+                        <legend><span class="translatible" data-trn-id="agentStatusLegend"></span></legend>
+                        <table border="0">
+                            <tr>
+                                <td class="colortxt">
+                                    <span id="agent-stateText" class="agent-status-text"></span> &nbsp;&nbsp;
+                                    <apex:image id="agent-stateImage" url="{!URLFOR($Resource.CCSPTPArchive, 'images/Available.png')}" alt=""></apex:image>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="colortxt">
+                                    <span class="translatible" data-trn-id="agentNameFieldTitle"></span>:&nbsp;<span id="agent-extension" class="txt-bold"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="colortxt">
+                                    <span class="translatible" data-trn-id="extensionFieldTitle"></span>:&nbsp;<span id="agent-extension-number" class="txt-bold"></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </div>
+                <div class="legendBox">
+                    <fieldset>
+                        <body>
+                           <button style="font-size:12px;height:25px;width:150px" onclick="getPageInfo();">Link Call to Case</button>
+                        </body>
+                        <legend><span class="translatible" data-trn-id="callInfoLegend"></span></legend>
+                        <table border="0">
+                            <tr>
+                                <td class="colortxt"><span class="translatible" data-trn-id="mediaFieldTitle"></span>:</td>
+                                <td><span id="callInfo-mediaType" class="txt-bold"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="colortxt"><span class="translatible" data-trn-id="directionFieldTitle"></span>:</td>
+                                <td><span id="callInfo-direction" class="txt-bold"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="colortxt"><span class="translatible" data-trn-id="stateFieldTitle"></span>:</td>
+                                <td><span id="callInfo-stateText" class="txt-bold"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="colortxt"><span class="translatible" data-trn-id="fromFieldTitle"></span>:</td>
+                                <td><span id="callInfo-from" class="txt-bold"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="colortxt"><span class="translatible" data-trn-id="toFieldTitle"></span>:</td>
+                                <td><span id="callInfo-to" class="txt-bold"></span></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                            </tr>
+                        </table>
+                    </fieldset>
+                    <div class="vspacer"></div>
+                    <div class="vspacer"></div>
+                    <table class="opt-table">
+                        <tr>
+                            <td class="action-cell">
+                                <a id="link-pagesync" href="" data-rel="popup" class="styled-button"><span class="translatible" data-trn-id = "pageSyncBtn"></span></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="action-cell">
+                                <!-- popup for call data -->
+                                <a id="link-popup-callDetail" href="#popup-callDetail" data-rel="popup" data-position-to="window" class="styled-button"><span class="translatible" data-trn-id = "callDetailsBtn"></span></a>
+                            </td>
+                        </tr>
+                    </table>
+                    <div data-role="popup" id="popup-callDetail" data-overlay-theme="b" data-theme="a" data-tolerance="5,5,5,5" class="ui-content">
+                        <fieldset>
+                            <legend><span class="translatible" data-trn-id="callDetailsBtn"></span></legend>
+                            <table border="0" class="fontsize9">
+                                <tr>
+                                    <td class="calldetail-item-label"><span class="translatible" data-trn-id="callIDFieldTitle"></span>:</td>
+                                    <td><span id="callDetail-callId" class="calldetail-item-value"></span></td>
+                                </tr>
+                                <tr>
+                                    <td class="calldetail-item-label"><span class="translatible" data-trn-id="fromFieldTitle"></span>:</td>
+                                    <td><span id="callDetail-from" class="calldetail-item-value"></span></td>
+                                </tr>
+                                <tr>
+                                    <td class="calldetail-item-label"><span class="translatible" data-trn-id="toFieldTitle"></span>:</td>
+                                    <td><span id="callDetail-to" class="calldetail-item-value"></span></td>
+                                </tr>
+                                <tr>
+                                    <td class="calldetail-item-label"><span class="translatible" data-trn-id="queueFieldTitle"></span>:</td>
+                                    <td><span id="callDetail-queueName" class="calldetail-item-value"></span></td>
+                                </tr>
+                                <tr>
+                                    <td class="calldetail-item-label"><span class="translatible" data-trn-id="callerNameFieldTitle"></span>:</td>
+                                    <td><span id="callDetail-callerName" class="calldetail-item-value"></span></td>
+                                </tr>
+                            </table>
+                        </fieldset>
+                        <div class="vspacer"></div>
+                        <apex:image id="callDetail-closebtn" title="Close" styleClass="pointer" url="{!URLFOR($Resource.CCSPTPArchive,
+                                        'images/Close.png')}" alt="Close"></apex:image> &nbsp;&nbsp;
+                    </div>
+                    <div class="vspacer"></div>
+                    <div id="trace-option-section" class="trace-option">
+                        <table border="0">
+                            <tr>
+                                <td style="width:20px"><span class="translatible" data-trn-id="traceFieldTitle"></span>:</td>
+                                <td>
+                                    <div class="trace-radio">
+                                        <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+                                            <input type="radio" name="trace-option" id="radio-trace-off" value="off" checked="checked" />
+                                            <label for="radio-trace-off"><span class="translatible" data-trn-id="offFieldTitle"></span></label>
+                                            <input type="radio" name="trace-option" id="radio-trace-on" value="on" />
+                                            <label for="radio-trace-on"><span class="translatible" data-trn-id="onFieldTitle"></span></label>
+                                        </fieldset>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!-- popup for dial action-->
+                    <!-- <a id="link-popup-dial" href="#popup-dial" data-rel="popup" data-position-to="window" class="styled-button">Dial Actions</a> -->
+                    <div data-role="popup" id="popup-dial" data-overlay-theme="b" data-theme="a" data-torelance="5,5,5,5" class="ui-content">
+                        <div class="legendBox">
+                            <fieldset>
+                                <legend><span class="translatible" data-trn-id="dialLegend"></span></legend>
+                                <table border="0">
+                                    <tr>
+                                        <td class="dialaction-item-label"><span class="translatible" data-trn-id="toFieldTitle"></span>:</td>
+                                        <td><span id="dialAction-number" class="dialaction-item-value"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <apex:image id="cancelbtn" title="Cancel" styleClass="pointer" url="{!URLFOR($Resource.CCSPTPArchive,
+                                                            'images/Close.png')}" alt="Cancel"></apex:image> &nbsp;&nbsp;
+                                            <apex:image id="dialbtn" title="Dial" styleClass="pointer" url="{!URLFOR($Resource.CCSPTPArchive,
+                                                            'images/Dial.png')}" alt="Dial"></apex:image>&nbsp;&nbsp;
+                                            <apex:image id="xferbtn" title="Transfer" styleClass="pointer" url="{!URLFOR($Resource.CCSPTPArchive,
+                                                            'images/Transfer.png')}" alt="Transfer"></apex:image> &nbsp;&nbsp;
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <!-- tooltip popup for error indicator -->
+                    <div id="error-indicator-popup-tooltip" data-role="popup" data-mini="true" class="ui-content" data-theme="a" style="max-width:200px;">
+                        <p>
+                            <div id="error-indicator-popup-text" class="translatible" data-trn-id="errorIndicatorPopupText"></div>
+                        </p>
+                        <div id="error-indicator-buttons-div">
+                            <a href="#" class="ui-btn ui-corner-all ui-btn-inline ui-mini ui-btn-b" data-rel="back"><span class="translatible" data-trn-id = "okBtn"></span></a>
+                            <a id="error-indicator-show-recent-btn" href="#" class="ui-btn ui-corner-all ui-btn-inline ui-mini ui-btn-b" data-rel="back"><span class="translatible" data-trn-id = "moreBtn"></span></a>
+                        </div>
+                    </div>
+                    <!-- search result modal which is displayed when screen pop url not found. -->
+                    <div id="popup-search-result" data-role="popup" data-overlay-theme="b" data-theme="a" data-tolerance="5,5,5,5" class="ui-content" style="max-width:200px;">
+                        <p>
+                            <div id="search-result-text"></div>
+                        </p>
+                        <div id="search-result-buttons-div">
+                            <a href="#" class="ui-btn ui-corner-all ui-btn-inline ui-mini ui-btn-b" data-rel="back"><span class="translatible" data-trn-id = "okBtn"></span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="touchPointFrame">
+                <iframe src=""></iframe>
+            </div>
+            <div id="saveLogAlert" class="modal translatible" data-trn-id="saveLogAlertText">
+            </div>
+            <div id="syncAlert" class="modal translatible" data-trn-id="syncAlertText">
+            </div>
+        </section>
+    </body>
+</apex:page>

@@ -1,0 +1,21 @@
+<apex:page standardcontroller="Case" extensions="CaseChangeSLAExtension" lightningStylesheets="true" >
+    <apex:pageMessages />
+    <apex:form >
+    <apex:outputPanel id="casepopup" layout="block" >
+        <apex:pageBlock title="Choose SLA">
+            <div align="center" draggable="false">
+                <apex:commandButton value="Change SLA" action="{!UpdateCasePriority}" />
+            </div>
+            <br></br>
+            <apex:pageblockTable value="{!lstmilestonedet}" var="mysla">
+                 <apex:column >
+                    <apex:inputCheckbox value="{!mysla.slaselected}" />
+                 </apex:column>
+                 <apex:column headerValue="Severity Level" value="{!mysla.mdseverity}" />
+                 <apex:column headerValue="Milestone Description" value="{!mysla.milestonedesc}" />
+                 <apex:column headerValue="Response Time Minutes" value="{!mysla.resptime}" styleclass="ct" />
+            </apex:pageblockTable>
+        </apex:pageBlock>
+    </apex:outputPanel>
+    </apex:form>
+</apex:page>

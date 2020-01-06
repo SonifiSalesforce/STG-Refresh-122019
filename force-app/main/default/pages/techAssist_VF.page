@@ -1,0 +1,18 @@
+<apex:page lightningStylesheets="true" standardController="ServiceAppointment">
+    <apex:includeLightning />
+    <div id="container"></div>
+
+    <script>
+    $Lightning.use("c:techAssist_LWC_App",function()
+    {
+        $Lightning.createComponent(
+            "c:techAssist_LWC",
+            {recordId: "{!ServiceAppointment.Id}"},
+            "container",
+            function(cmp)
+            {
+                console.log('component created');
+            });
+    });
+    </script>
+</apex:page>

@@ -1,0 +1,13 @@
+<template>
+    <lightning-card title="Create Tech Assist SA" icon-name="standard:record">
+        <div class="slds-m-around_medium">
+            <lightning-button-stateful label-when-off="Create Tech Assist SA" label-when-on="SA Created"
+                icon-name-when-off="utility:add" icon-name-when-on="utility:check" selected={isSelected}
+                onclick={create_TA}>
+            </lightning-button-stateful>
+            <template if:true={showTAButton}>
+                <lightning-button label="Open Tech Assist SA" variant="brand" onclick={openTAClick}></lightning-button>
+            </template>
+        </div>
+    </lightning-card>
+</template>

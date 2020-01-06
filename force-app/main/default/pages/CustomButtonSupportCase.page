@@ -1,0 +1,58 @@
+<apex:page standardcontroller="Account" extensions="CustomButtonCreateSupportCase" lightningStylesheets="true"  >
+    <style>
+        .ct{
+        text-align:center;
+        }
+    </style>
+    <apex:form >
+        <apex:pageMessages />
+        <apex:pageBlock >
+            <div align="center" draggable="false">
+                <apex:commandButton value="Create Support Case" action="{!CreateSupportCase}" />
+                <apex:commandButton value="Non-Contracted Case" action="{!CreateNonContracted}" />
+                <apex:commandButton value="Clear Form" action="{!ClearErrMessage}" />
+            </div>
+            <br></br>
+            <apex:pageblockTable value="{!lstcheckedents}" var="ent">
+                <apex:column >
+                    <apex:inputCheckbox value="{!ent.selected}" />
+                </apex:column>
+                <apex:column headerValue="Entitlement Name">
+                    <apex:outputLink value="{!URLFOR($Action.Entitlement.View, ent.qte.id)}"
+                        target="_blank">{!ent.qte.name}</apex:outputLink>
+                </apex:column>
+                <apex:column headerValue="Asset Name">
+                    <apex:outputLink value="{!URLFOR($Action.Asset.View, ent.qte.assetid)}"
+                        target="_blank">{!ent.qte.asset.name}</apex:outputLink>
+                </apex:column>
+                <apex:column headerValue="Start Date" value="{!ent.qte.startdate}" />
+                <apex:column headerValue="End Date" value="{!ent.qte.enddate}" />
+                <apex:column headerValue="Status" value="{!ent.qte.status}" />
+                <apex:column headerValue="SLA Process" value="{!ent.qte.slaprocess.name}" />
+             </apex:pageblockTable>
+             <apex:outputPanel id="casepopup" layout="block" >
+                <apex:pageBlock title="Choose SLA" rendered="{!displayPopUp}">
+                    <apex:pageblockTable value="{!lstmilestonedet}" var="mysla">
+                         <apex:column >
+                            <apex:inputCheckbox value="{!mysla.slaselected}" />
+                         </apex:column>
+                         <apex:column headerValue="Severity Level" value="{!mysla.mdseverity}" />
+                         <apex:column headerValue="Milestone Description" value="{!mysla.milestonedesc}" />
+                         <apex:column headerValue="Response Time Minutes" value="{!mysla.resptime}" styleclass="ct" />
+                    </apex:pageblockTable>
+                </apex:pageBlock>
+                <apex:pageBlock title="Quick Create Case" rendered="{!displaynewcase}" >
+                        <apex:pageBlockSection columns="2" >
+                                <apex:repeat value="{!fields}" var="f" >
+                                    <apex:inputField value="{!suppcase[f.fieldPath]}" />
+                                </apex:repeat>
+                        </apex:pageBlockSection>
+                        <apex:pageBlockButtons >
+                                <apex:commandButton value="Cancel" title="Cancel" action="{!CancelPopup}"  />
+                                <apex:commandButton value="Save Case" title="SaveCase" action="{!SaveCase}" />
+                        </apex:pageBlockButtons>
+                 </apex:pageBlock>
+             </apex:outputPanel>
+          </apex:pageBlock>
+    </apex:form>
+</apex:page>
